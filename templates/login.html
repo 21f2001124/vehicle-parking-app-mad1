@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <title>Login Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div>
+        <div id="canvas">
+            <div id="login-body" class="body-font">
+                <h2 class="center heading-font">Login Form</h2>
+                <form action="/login" method="post" >
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="exampleFormControlInput1"  placeholder="email_id@gmail.com" name="email" required>
+                  </div>
+
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="exampleFormControlTextarea1" placeholder="enter password" name="pwd" required>
+                    <div class="center">  <br>
+                    <button class="btn btn-success" type="submit">Submit</button> <br>
+                    <!-- <input type="submit" class="btn btn-success" value="SUBMIT!"><br> -->
+                    <a href="/signup"> Are you registered?</a></div>
+                  </div>
+                </form>
+            </div>
+        </div> 
+
+    </div>
+</body>
+</html>
