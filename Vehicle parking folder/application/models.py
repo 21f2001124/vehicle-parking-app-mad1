@@ -2,7 +2,7 @@ from application.database import db
 from .database import db  # .takes file from the same folder as we are in
 
 
-
+#this is the table for user
 class User(db.Model):
     __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True)
@@ -11,13 +11,13 @@ class User(db.Model):
     pwd = db.Column(db.String(100), nullable=False)
     adress = db.Column(db.String(200), nullable=False)
     pincode = db.Column(db.Integer, nullable=False)
-    # "admin" or "user"
+    #default is the user...so in the website no option for admin
     type = db.Column(db.String(20), nullable=False, default="user")
 
-    # Relationship to reservations
+    #relationship to reservations of parking spot
     reservations = db.relationship('ReserveParkingSpot', backref='user', lazy=True)
 
-
+# table for parkinglot
 class ParkingLot(db.Model):
     __tablename__ = 'parking_lot'
     lot_id = db.Column(db.Integer, primary_key=True)
@@ -30,7 +30,7 @@ class ParkingLot(db.Model):
     # One-to-many relationship to ParkingSpot
     spots = db.relationship('ParkingSpot', backref='lot', lazy=True)
 
-
+# table for parking spot
 class ParkingSpot(db.Model):
     __tablename__ = 'parking_spot'
     spot_id = db.Column(db.Integer, primary_key=True)
@@ -40,23 +40,19 @@ class ParkingSpot(db.Model):
     # Relationship to reservations
     reservations = db.relationship('ReserveParkingSpot', backref='spot', lazy=True)
 
-
+#table for reserve parking spot 
 class ReserveParkingSpot(db.Model):
     __tablename__ = 'reserve_parking_spot'
     res_spot_id = db.Column(db.Integer, primary_key=True)
 
-    # Associations
+    # these are the associations 
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     spot_id = db.Column(db.Integer, db.ForeignKey('parking_spot.spot_id'), nullable=False)
-
-    # Vehicle details
-    vehicle_no = db.Column(db.String(20), nullable=False)
-
-    # Timing
+    vehicle_no = db.Column(db.String(20), nullable=False) #this is vehicle detail
+    #these denote the timing column of the table
     parking_time = db.Column(db.DateTime, nullable=False)
     leaving_time = db.Column(db.DateTime, nullable=True)
-
-    # Pricing
+    #this is the prices
     parking_cost_unit_time = db.Column(db.Integer, nullable=False)
 
     

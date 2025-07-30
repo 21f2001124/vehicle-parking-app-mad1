@@ -1,87 +1,94 @@
 from flask import Flask, render_template, redirect, request,  url_for
-from flask import session, flash
+from flask import session, flash  #code to display messages
 from datetime import datetime
 from sqlalchemy import func, extract
-
 from flask import current_app  as app # breaks the circular import loop
-
 from application.models import * 
 
+#a basic route to welcome user or admin..this is the first route
 @app.route("/")
 def index():
     return render_template("Welcome.html")
 
-
-@app.route("/login", methods=["GET", "POST"])  # defauls id get method
-def login():
+#the wecome pages takes to login and signup this is login route
+@app.route("/login", methods=["GET", "POST"])  # defauls method is GET, here both show and process login form
+# when form is submitted method becoms post
+def login(): 
     if request.method == "POST":
         email = request.form.get("email")
-        password = request.form.get("pwd")
-        thisuser = User.query.filter_by(email=email).first()
+        password = request.form.get("pwd") #extracts email and password from requesr
+        thisuser = User.query.filter_by(email=email).first() #tries to user with this email
         if thisuser:
-            if thisuser.pwd == password:
-                # Save the user ID in session
+            if thisuser.pwd == password: #checks pwd for tthat user
+                # stores the user details in session so that user stays logged in across all the pages.
                 session["user_id"] = thisuser.user_id
                 session["user_name"] = thisuser.name
                 session["user_type"] = thisuser.type
 
                 # Optional debug log
-                print("DEBUG: Logged in user_id:", session["user_id"])
-
+                # print("DEBUG: Logged in user_id:", session["user_id"])
                 flash("Login successful!", "success")
                 if thisuser.type == "user":
                     return redirect(url_for("Udashboard"))
+                   
                 else:
                     return redirect(url_for("Adashboard"))
-            else:
-                flash("Incorrect password.", "danger")
-        else:
-            flash("Email not found.", "danger")
 
-    return render_template("login.html")
+    return render_template("login.html") #shows this loginhtml
 
-
+#singup route
 @app.route("/signup",methods=["GET","POST"])  #default get method
 def signup():
-    # print("Form hit this route")
-    if request.method== "POST" :
+    if request.method== "POST" : # mans user submit signup form
         email= (request.form.get("email"))
         pwd= (request.form.get("pwd"))
         name= (request.form.get("name"))
         address=(request.form.get("Address"))
         pincode= (request.form.get("pincode"))
-        print("hello")
+        # print("hello")
         try:
+            #left name..from user table and name from html input type='' text=''... like this
             user = User(name=name, email=email, pwd=pwd, adress= address, pincode= pincode)
-            db.session.add(user)         # You forgot to pass 'user' to add()
+            db.session.add(user)        #adding user to database session
             db.session.commit()          # Commit the session to save changes
-            return redirect(url_for("login"))  # Redirect after successful signup
+            return redirect(url_for("login"))  #rdirect user to login page after successful signup
         except Exception as e:
             db.session.rollback()        # Roll back the session if there's an error
             print(f"Error while adding user: {e}")
             return "An error occurred during signup. Please try again."
 
-        # return "You are sign in"
     return render_template("signup.html")
 
-#code for display data 
+
+#route for admin edit parking lot
 @app.route("/Aeditparkinglot/<int:lot_id>", methods=["GET", "POST"])
 def Aeditparkinglot(lot_id):
     lot = ParkingLot.query.get_or_404(lot_id)
 
     if request.method == "POST":
-        lot.prime_location = request.form.get("prime_location")
-        lot.address = request.form.get("address")
-        lot.pincode = request.form.get("pincode")
-        lot.price = request.form.get("price")
-        lot.max_spots = request.form.get("max_spots")
-
         try:
+            # Fetch current occupied spot count
+            occupied_spots = ParkingSpot.query.filter_by(lot_id=lot_id, status='occupied').count()
+            new_max_spots = int(request.form.get("max_spots"))
+
+            if new_max_spots < occupied_spots:
+                flash(f"Cannot set total spots to {new_max_spots}!!!{occupied_spots} spots are already occupied.", "danger")
+                return redirect(url_for("Aeditparkinglot", lot_id=lot_id))
+
+            # Update the lot if valid
+            lot.prime_location = request.form.get("prime_location")
+            lot.address = request.form.get("address")
+            lot.pincode = request.form.get("pincode")
+            lot.price = request.form.get("price")
+            lot.max_spots = new_max_spots
+
             db.session.commit()
+            flash("Parking lot updated successfully.", "success")
             return redirect(url_for("Adashboard"))
+
         except Exception as e:
             db.session.rollback()
-            return f"Error updating parking lot: {e}"
+            flash(f"Error updating parking lot: {str(e)}", "danger")
 
     return render_template("Aeditparkinglot.html", lot=lot)
 
@@ -201,31 +208,27 @@ def logout():
 
 @app.route("/edit_profile", methods=["GET", "POST"])
 def Aeditprofile():
-    # Make sure the user is logged in
     user_id = session.get("user_id")
     if not user_id:
         flash("Please log in first.", "warning")
         return redirect(url_for("login"))
 
-    # Load the user from the DB
     user = User.query.get(user_id)
     if not user:
         flash("User not found.", "danger")
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        # Update fields from form
         user.name = request.form["name"]
         user.email = request.form["email"]
         user.adress = request.form["address"]
         user.pincode = request.form["pincode"]
-
-        # Save
         db.session.commit()
         flash("Profile updated successfully!", "success")
-        return redirect(url_for("edit_profile"))
+        return redirect(url_for("Aeditprofile"))  # ✅ Fix applied here
 
     return render_template("Aeditprofiledetails.html", user=user)
+
 
 @app.route("/Udashboard")
 def Udashboard():
@@ -339,21 +342,29 @@ def UdashSummary():
 def UdashContact():
     return render_template("UdashContact.html")
 
-@app.route('/userdashboard/editprofile', methods=['GET', 'POST'])
+@app.route("/userdashboard/editprofile", methods=["GET", "POST"])
 def Ueditprofile():
-    user_id = session.get('user_id')
+    user_id = session.get("user_id")
     if not user_id:
-        return redirect(url_for('login'))
+        flash("Please log in first.", "warning")
+        return redirect(url_for("login"))
+
     user = User.query.get(user_id)
-    if request.method == 'POST':
-        user.name = request.form['name']
-        user.email = request.form['email']
-        user.adress = request.form['adress']
-        user.pincode = request.form['pincode']
+    if not user:
+        flash("User not found.", "danger")
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+        user.name = request.form["name"]
+        user.email = request.form["email"]
+        user.adress = request.form["address"]
+        user.pincode = request.form["pincode"]
         db.session.commit()
-        flash('Profile updated successfully!')
-        return redirect(url_for('Udashboard'))
-    return render_template("Ueditprofile.html", user=user)
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for("Ueditprofile"))  # ✅ Fix applied here
+
+    return render_template("Ueditprofiledetails.html", user=user)
+
 
 @app.route("/admin/parking_lot/new", methods=["GET", "POST"])
 def AnewParkingLot():

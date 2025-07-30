@@ -8,6 +8,19 @@
 </head>
 <body>
     <div class="container mt-4">
+        <!-- FLASH MESSAGE SECTION -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <h3 class="text-center">Edit Parking Lot</h3>
         <form method="post">
             <div class="mb-3">
@@ -36,5 +49,17 @@
             </div>
         </form>
     </div>
+
+    <!-- AUTO-DISMISS FLASH SCRIPT -->
+    <script>
+        setTimeout(function() {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                alert.classList.remove('show');
+                alert.classList.add('fade');
+                setTimeout(() => alert.remove(), 300); // remove from DOM after fading
+            }
+        }, 2000); // 2 seconds
+    </script>
 </body>
 </html>

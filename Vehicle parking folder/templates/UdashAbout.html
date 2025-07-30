@@ -17,9 +17,9 @@
     <nav class="Adashbox" style="margin-bottom: 20px;">
         <span class="nav-link" style="padding-right: 150px; font-size: larger; color: black;"> Welcome to EZeeSpot!
         </span>
-        <a class="nav-link" href="Udashboard.html"> Home</a>
-        <a class="nav-link" href="UdashAbout.html"> About</a>
-        <a class="nav-link" href="UdashSummary.html"> Summary</a>
+        <a class="nav-link" href="{{ url_for('Udashboard') }}"> Home</a>
+        <a class="nav-link" href="{{ url_for('UdashAbout') }}"> About</a>
+        <a class="nav-link" href="{{ url_for('UdashSummary') }}">Summary</a>
         <a class="nav-link" href="{{url_for('UdashContact')}}"> Contact Us</a>
         <a class="nav-link" style="padding-left: 400px;" href="{{url_for('Ueditprofile')}}"> Edit profile</a>
     </nav>

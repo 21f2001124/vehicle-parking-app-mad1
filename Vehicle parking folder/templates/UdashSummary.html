@@ -26,6 +26,7 @@
       Welcome {{ session.get('user_name') }}!
     </span>
     <a class="nav-link" href="{{ url_for('Udashboard') }}">Home</a>
+    <a class="nav-link" href="{{ url_for('UdashAbout') }}"> About</a>
     <a class="nav-link" href="{{ url_for('UdashSummary') }}">Summary</a>
     <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
     <a class="nav-link" style="padding-left: 400px;" href="{{ url_for('Ueditprofile') }}">Edit Profile</a>

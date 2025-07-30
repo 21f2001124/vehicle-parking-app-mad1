@@ -13,7 +13,7 @@ def create_app():
     return app 
 
 app=create_app()
-from application.controller import *
+from application.routes import *
 
 if __name__ == "__main__":
     app.run()
